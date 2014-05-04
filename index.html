@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html ng-app="conflictApp">
+<head>
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script>
+    <script src="script/controller.js"></script>
+    <link rel="stylesheet" href="jmap/jquery-jvectormap-1.2.2.css" type="text/css" media="screen"/>
+    <script src="jmap/jquery-jvectormap-1.2.2.min.js"></script>
+    <script src="jmap/jquery-jvectormap-world-mill-en.js"></script>
+    <style>
+html, body {height:100%;width:100%;margin: 0px;padding:0px;}
+.conflictList{font-size: 16px;float:left; border:1px; min-width:300px;width:500px;height:250px;
+overflow-y:auto;cursor: pointer; cursor: hand;}
+.conflictdescr{padding-bottom: 10px; font-size: 16px; min-width:200px;max-width:500px; }
+.conflictImage{padding-right:2px;}
+    </style>
+</head>
+<body>
+
+  <section ng-controller="ConflictListCtrl">
+  <input type="hidden" id="h_clk_region" ng-model="clkRegion" ng-init="clkRegion=Israel" value="{{clkRegion}}" />
+  
+  <div style="height: 300px;">
+    <div id="world-map" style="background-color:red;float:left;width:700px;height: 300px;"></div>
+    <div style="background-color:yellow;height: 300px;width:*">
+        <h3>Total conflicts in {{selectedRegion}}: {{conflicts.length}}</h3>
+          <div class="conflictList">
+             <div ng-repeat="item in conflicts | orderBy:'time_event_start_date':reverse=true">
+              <span ng-click="ShowDescr(item);ShowPerson(item)">{{item.name}} <b>{{item.time_event_start_date}} - {{item.time_event_end_date}}</b></span>
+            </div>
+          </div>
+    </div>
+  </div>
+
+  <div style="height:700px">
+    <div style="background-color:green;float:left;width:700px;min-height:100%;overflow:auto;">
+        <h2 ng-bind="currentConflictName"></h2>
+        <div class="conflictdescr" ng-bind="currentConflictDescr">
+        </div>
+        <img class="conflictImage" ng-repeat="image in currentConflictImages" ng-src="https://www.googleapis.com/freebase/v1/image{{image.mid}}?maxwidth=200&maxheight=200" title="{{image.name}}"/>
+    </div>
+    <div style="background-color:blue;min-height:100%;overflow:auto;">
+        <h3>Combatants:</h3>
+           <img class="conflictImage" ng-repeat="person in currentConflictCombatants" ng-src="https://www.googleapis.com/freebase/v1/image{{person.mid}}?maxwidth=90&maxheight=140&amp;errorid=/freebase/no_image_png" title="{{person.name}}"/>
+
+         <h3>Commanders:</h3>
+           <img class="conflictImage" ng-repeat="person in currentConflictCommander" ng-src="https://www.googleapis.com/freebase/v1/image{{person.mid}}?maxwidth=90&maxheight=140&amp;errorid=/freebase/no_image_png" title="{{person.name}}"/>
+
+         <h3>Personnel Involved:</h3>
+           <img class="conflictImage" ng-repeat="person in currentConflictPersonnelInvolved" ng-src="https://www.googleapis.com/freebase/v1/image{{person.mid}}?maxwidth=90&maxheight=140&amp;errorid=/freebase/no_image_png" title="{{person.name}}"/>
+
+    </div>
+  </div>
+
+ <script>
+          $(function(){
+            $('#world-map').vectorMap({onRegionClick:function(e,code)
+              {
+                var map = $('#world-map').vectorMap('get', 'mapObject');
+                var scope = angular.element($('#world-map')).scope();
+                scope.$root.selectedRegion = map.getRegionName(code);
+                scope.ResetCurrentConflict();
+                scope.Load();
+              }
+            });
+          });
+        </script>
+
+  </section>
+</body>
+</html>
